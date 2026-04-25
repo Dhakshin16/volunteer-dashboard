@@ -1,0 +1,42 @@
+{
+  "summary": "Iteration 3 retest verified ALL AdminDashboard fixes from iteration 2: dashboard renders without runtime errors, appointments tab functional, Reschedule dialog opens & persists new date/slot, Cancel flips status to 'cancelled'. DoctorRegister ImageUpload component renders (Upload image button visible). /api/doctor/patients endpoint returns 200; public /api/files/{path} download works (verified via live 200 responses for existing avatar and 404 for missing). One NEW issue discovered: notification_service logger.info() messages (including [MOCKED EMAIL] appointment cancelled) are NOT written to any log file because app-module loggers have no handler configured — uvicorn's root logger config does not propagate to 'app.services.notification_service'. The notification function IS being called (code path confirmed via 200 PATCH responses), but the log line the reviewer asked to verify is invisible.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "notification_service (all send_* helpers)",
+        "issue": "logger.info(...) calls produce no output because no handler/basicConfig is set for app loggers. `[MOCKED EMAIL]` lines never appear in /var/log/supervisor/backend.out.log. Either switch to `print(...)` for the mock stub, or add `logging.basicConfig(level=logging.INFO)` / dictConfig in app/main.py, or uvicorn --log-config that includes the `app` logger at INFO."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "In /app/backend/app/services/notification_service.py (or app/main.py startup), configure logging so INFO-level messages from app.* loggers actually reach stdout. Easiest fix: add `logging.basicConfig(level=logging.INFO, format='%(levelname)s:     %(message)s')` at top of app/main.py BEFORE uvicorn starts, OR replace `logger.info(...)` with `print(...)` inside notification_service (since it's a dev-only mock). Without this, the MOCKED EMAIL verification step in the product spec cannot be observed.",
+    "(Optional, out of scope for this retest) notification_service.send_appointment_booked is defined but not referenced anywhere per grep — confirm it's wired in appointment.py if product wants booking confirmation emails."
+  ],
+  "critical_code_review_comments": [
+    "notification_service uses logger.info without any handler setup → all mocked email lines are silently dropped. Not a runtime bug but fails the acceptance criteria 'verify [MOCKED EMAIL] appointment cancelled line in backend.out.log'.",
+    "AdminDashboard.jsx is now correct — all imports, state hooks and /admin/appointments fetch are present. Confirmed by live run.",
+    "DoctorRegister ImageUpload uses testId='doctor-image' which yields final button testid `doctor-image-btn` (as expected by spec).",
+    "Public file endpoint /api/files/{path} correctly bypasses auth (404 for missing, 200 for existing) and returned a real uploaded doctor avatar mid-test — storage + signed-URL-less public access verified end-to-end."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (iteration-2 pytest suite unchanged; 32/32 pass)",
+    "frontend": "100% on the 5 items requested (admin render, appointments tab, reschedule save, cancel flip, DoctorRegister ImageUpload button). Only the server-side [MOCKED EMAIL] log assertion fails due to logging config."
+  },
+  "test_credentials": "Freshly created via Firebase signup during this run: admin e2e_admin_1776797270@aura-test.dev / Password123! ; patient e2e_pat_1776797270@aura-test.dev / Password123! (booking flow did not complete because the /patient/doctors book-doctor button selector was not matched in this run, but the pre-existing appointment id=1 'Jeevika → Dhakshin N' was available and used for the reschedule+cancel test).",
+  "seed_data_creation": "Reused existing appointment id=1 (booked by patient 'Jeevika' against approved doctor 'Dhakshin N'). No new seed data required — the fix retest was performed against this row: rescheduled from 2026-04-29 10:00 AM → 2026-04-20 11:00 AM, then cancelled (status='cancelled').",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Admin dashboard + appointment management is fully green. The only remaining spec gap is the [MOCKED EMAIL] log visibility — main agent can self-verify with one `logging.basicConfig` line or by switching notification_service to print(). After that fix, `grep '[MOCKED EMAIL]' /var/log/supervisor/backend.out.log` should show a cancelled line whenever an admin PATCHes an appointment to status='cancelled'. DoctorRegister ImageUpload & /api/files public download are confirmed working.",
+  "rca of the issue": "Python logging: modules that do `logger = logging.getLogger(__name__)` without any handler attached will use the root logger's config. Uvicorn configures its own 'uvicorn' and 'uvicorn.access' loggers but does NOT set the root level/handler, so `app.services.notification_service` (INFO) falls below the default WARNING threshold of the root logger and gets dropped. Mitigation: add `logging.basicConfig(level=logging.INFO)` in app/main.py or in server entry before app import, or replace logger.info with print in the mock stubs."
+}

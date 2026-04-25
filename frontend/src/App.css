@@ -1,0 +1,2 @@
+/* App-level tweaks layered on top of index.css */
+.page-fade-in { animation: fade-up .5s cubic-bezier(.4,0,.2,1) both; }

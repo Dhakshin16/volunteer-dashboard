@@ -1,0 +1,134 @@
+{
+  "theme": "light",
+  "archetype": "1 (Organic & Earthy)",
+  "design_philosophy": "Calm, trust, and clinical credibility without the sterile 'health app' feel. Prioritize warmth, generous spacing, and organic color palettes. Use bento grids for structured dashboard data.",
+  "colors": {
+    "background": {
+      "default": "#F7F5F2",
+      "surface": "#FFFFFF",
+      "muted": "#EBE8E2"
+    },
+    "primary": {
+      "default": "#2C4C3B",
+      "hover": "#1E3529",
+      "foreground": "#FFFFFF"
+    },
+    "secondary": {
+      "default": "#D4DDD7",
+      "hover": "#C5D0CA",
+      "foreground": "#2C4C3B"
+    },
+    "accent": {
+      "default": "#C06C55",
+      "hover": "#A65A45",
+      "foreground": "#FFFFFF"
+    },
+    "risk_levels": {
+      "low": "#4A6B5D",
+      "medium": "#D99A5A",
+      "high": "#C06C55"
+    },
+    "text": {
+      "primary": "#1A1D1A",
+      "muted": "#5C665F",
+      "inverse": "#FFFFFF"
+    },
+    "border": {
+      "default": "#E2E0D9",
+      "focus": "#2C4C3B"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Outfit, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight font-light",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-medium",
+      "h3": "text-xl sm:text-2xl font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm",
+      "overline": "text-xs uppercase tracking-[0.2em] font-semibold"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing Philosophy (2-3x more spacing). Tailwind Scale: p-6, p-8, p-12.",
+    "dashboard_grid": "MODE B: 'CONTROL ROOM' Grid. Tight gaps (gap-6). Use bento layout for Patient and Admin dashboards. Widgets must stretch to fill heights.",
+    "marketing_grid": "MODE A: 'TETRIS' Grid. Wide gaps (gap-8 to gap-12). Asymmetric alignments.",
+    "borders_and_radius": "Subtle roundness, max 8px (rounded-lg). All cards must have a 1px solid border (border-border) with no drop shadow by default.",
+    "surfaces": {
+      "cards": "Flat background, 1px border, no shadow. On hover: -translate-y-1, shadow-lg, border color darkens.",
+      "header": "Crystal Glassmorphism: backdrop-blur-xl bg-white/70, 1px bottom border border-border/40."
+    }
+  },
+  "components_strategy": {
+    "general": "Always add data-testid attributes to all interactive elements for testing.",
+    "buttons": "Rounded-lg, minimal shadows. Primary buttons use Deep Forest Green. Accent buttons use Terracotta.",
+    "cards": "Use Shadcn Card for dashboards but strip heavy shadows. Use flat, rectangular, dense styles.",
+    "forms": "Use Shadcn Input/Select/Form. Inputs must have clear focus states (ring-2 ring-primary).",
+    "charts": "Use Recharts or Shadcn Charts. Palettes must map to risk_levels or earthy greens/sages. Avoid default vivid chart colors.",
+    "icons": "Use lucide-react (default). Stroke width 1.5 for a sophisticated, light feel.",
+    "badges": "Used for AI Emotion Chips, Risk Levels, and Status. Soft backgrounds with darker text (e.g., bg-secondary text-secondary-foreground)."
+  },
+  "animations": {
+    "hover": "transition-all duration-200 ease-in-out",
+    "page_transitions": "Fade and slight slide-up (translate-y-4 to 0, opacity 0 to 1).",
+    "lists": "Staggered entrance animations for dashboard feed/list items."
+  },
+  "media": {
+    "hero_background": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/b0e01279-a003-438d-83aa-07285e8af13d/images/1251140e4701b43af34467dba2f1d2f6adf9e6bab35eff417e85e018b45c2cc9.png",
+      "description": "Minimalist abstract organic waves for the landing page hero section. Use with bg-black/10 or no overlay if text is dark."
+    },
+    "auth_background": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/b0e01279-a003-438d-83aa-07285e8af13d/images/ea3694d6ead0745c248fa919c695c3873ba42f9a02fc36e68751997e7add69a0.png",
+      "description": "Clean, minimalist doctor workspace for the side panel of the Login/Signup screen."
+    },
+    "doctor_avatar_1": {
+      "url": "https://images.pexels.com/photos/8460157/pexels-photo-8460157.jpeg",
+      "description": "Avatar/Portrait for Doctor booking cards or Admin approval lists."
+    },
+    "doctor_avatar_2": {
+      "url": "https://images.pexels.com/photos/19963165/pexels-photo-19963165.jpeg",
+      "description": "Avatar/Portrait for Doctor booking cards or Admin approval lists."
+    },
+    "mood_nature_1": {
+      "url": "https://images.pexels.com/photos/34725104/pexels-photo-34725104.jpeg",
+      "description": "Serene sunset reflection. Can be used in Patient Journal headers or breathing exercise sections."
+    },
+    "mood_nature_2": {
+      "url": "https://images.pexels.com/photos/7899777/pexels-photo-7899777.jpeg",
+      "description": "Serene abstract seascape for Patient Dashboard headers."
+    }
+  },
+  "pages_instructions": {
+    "landing_page": {
+      "layout": "Mode A Tetris grid. Hero section with `hero_background`. Heavy typography. Emotional copy emphasizing trust.",
+      "components": "Custom HTML/Tailwind, Marquee for features/benefits (slow, subtle). Glassmorphism header."
+    },
+    "auth": {
+      "layout": "Split screen: left side form (clean, white background), right side `auth_background` image covering full height.",
+      "components": "Firebase Email/Password + Google Sign-In button (use Shadcn Button with outline variant and Google SVG)."
+    },
+    "role_selection": {
+      "layout": "Centered clean cards allowing user to pick Patient, Doctor, or Admin. Large padding, hover effects.",
+      "components": "Bento style cards for each role."
+    },
+    "patient_dashboard": {
+      "layout": "Mode B Control Room Grid. Top banner for risk detection (uses accent color if high risk).",
+      "features": "Mood log bento box (1-10 slider + multiselect chips). Journaling box with AI emotion detection display (chips below text area). Analytics chart (Recharts line chart).",
+      "assessments": "Clean, step-by-step wizard UI for PHQ-9 & GAD-7 with clear, un-intimidating typography."
+    },
+    "doctor_dashboard": {
+      "layout": "Sidebar navigation. Main area uses Mode B Grid.",
+      "features": "Appointment calendar/list, Patient list. Approval pending screen must be a clean, centered message with an organic graphic if they are not yet approved by Admin."
+    },
+    "admin_dashboard": {
+      "layout": "Dense data view. Sidebar navigation.",
+      "features": "Table for pending doctors (Approve/Reject actions). High-risk users monitor panel with Terracotta alerts. System stats in top bento boxes."
+    }
+  }
+}
