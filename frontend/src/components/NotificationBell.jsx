@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, CheckCheck, Inbox } from 'lucide-react';
+import { Bell, Check, CheckCheck, Inbox, Settings } from 'lucide-react';
 import { api } from '@/lib/api';
 
 function timeAgo(iso) {
@@ -30,6 +30,12 @@ export default function NotificationBell() {
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
   const nav = useNavigate();
+  const prefsLink = (() => {
+    const p = window.location.pathname;
+    if (p.startsWith('/admin')) return '/admin/notifications';
+    if (p.startsWith('/ngo')) return '/ngo/notifications';
+    return '/v/notifications';
+  })();
 
   const unread = items.filter(n => !n.read).length;
 
@@ -102,15 +108,26 @@ export default function NotificationBell() {
         >
           <div className="px-4 py-3 flex items-center justify-between border-b border-white/10">
             <div className="font-heading text-white">Notifications</div>
-            <button
-              type="button"
-              onClick={markAll}
-              disabled={unread === 0}
-              data-testid="notification-mark-all-read"
-              className="text-xs text-violet-300 hover:text-white disabled:opacity-40 flex items-center gap-1"
-            >
-              <CheckCheck size={14} /> Mark all read
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={markAll}
+                disabled={unread === 0}
+                data-testid="notification-mark-all-read"
+                className="text-xs text-violet-300 hover:text-white disabled:opacity-40 flex items-center gap-1"
+              >
+                <CheckCheck size={14} /> Mark all read
+              </button>
+              <button
+                type="button"
+                onClick={() => { setOpen(false); nav(prefsLink); }}
+                data-testid="notification-prefs-link"
+                className="text-xs text-white/60 hover:text-white flex items-center gap-1"
+                title="Preferences"
+              >
+                <Settings size={14} />
+              </button>
+            </div>
           </div>
           <div className="max-h-[420px] overflow-y-auto">
             {loading && items.length === 0 ? (

@@ -165,21 +165,35 @@ async def notify(
     cta_url: Optional[str] = None,
     sms_body: Optional[str] = None,
 ) -> dict:
-    """Fan-out notification: in-app + email + SMS, all best-effort and concurrent."""
+    """Fan-out notification: in-app + email + SMS, all best-effort and concurrent.
+
+    Respects the user's notification preferences (collection: users.notif_prefs):
+      { "email": True/False, "sms": True/False, "in_app": True/False }
+    """
     results: dict = {"in_app": None, "email": None, "sms": None}
 
-    # in-app (sync, fast)
+    prefs = {"email": True, "sms": True, "in_app": True}
     if user_id:
+        try:
+            user_doc = db.collection("users").document(user_id).get()
+            if user_doc.exists:
+                p = (user_doc.to_dict() or {}).get("notif_prefs") or {}
+                prefs.update({k: bool(v) for k, v in p.items() if k in prefs})
+        except Exception as exc:
+            logger.warning("read prefs failed: %s", exc)
+
+    # in-app (sync, fast)
+    if user_id and prefs["in_app"]:
         try:
             results["in_app"] = create_in_app(user_id, title, message, kind=kind, link=link)
         except Exception as exc:
             logger.warning("in_app create failed: %s", exc)
 
     tasks = []
-    if email:
+    if email and prefs["email"]:
         html = _wrap_html(title, f"<p>{message}</p>", cta_label=cta_label, cta_url=cta_url)
         tasks.append(("email", send_email(email, title, html)))
-    if phone:
+    if phone and prefs["sms"]:
         body = sms_body or f"VolunCore: {title}. {message}"
         # Truncate to keep within a single SMS-ish length
         body = body if len(body) <= 320 else body[:317] + "..."

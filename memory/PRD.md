@@ -11,8 +11,11 @@ wherever possible across the platform.
 - **SMS**: Twilio (`twilio` Python SDK), E.164 numbers required.
 - **In-app**: Firestore collection `notifications` (per-user feed), polled by
   the React `NotificationBell` component every 45s.
-- All channels are best-effort: missing creds → log + no-op (never blocks).
-- New routes prefixed `/api/notifications`.
+- **Background scheduler**: `app/services/scheduler.py` runs every 10 min in
+  the FastAPI event loop and dispatches event reminders 24h and 1h before
+  start (idempotent — sentinel fields on event doc prevent double-send).
+- **Notification preferences**: per-user `notif_prefs` stored on the user doc;
+  `notify()` consults them before email/SMS/in-app dispatch.
 
 ## Notification triggers wired
 | Trigger | Owner gets | Admin gets | Volunteer gets |
@@ -26,40 +29,55 @@ wherever possible across the platform.
 | Event scheduled | confirmation | – | – |
 | Volunteer enrolls in cause | new-volunteer alert (in-app + email + SMS) | – | success (in-app + email) |
 | Event RSVP confirmed | – | – | confirmation (in-app + email) |
+| **Event reminder 24h before** | digest with RSVP count | – | reminder (in-app + email) |
+| **Event reminder 1h before** | – | – | last-minute reminder (in-app + email) |
 
 ## API additions
-- `GET /api/notifications/me`
-- `GET /api/notifications/me/unread-count`
+- `GET  /api/notifications/me`
+- `GET  /api/notifications/me/unread-count`
 - `POST /api/notifications/{id}/read`
 - `POST /api/notifications/read-all`
+- `GET  /api/notifications/preferences`
+- `PUT  /api/notifications/preferences`     (email / sms / in_app booleans)
+- `POST /api/admin/scheduler/run-now`        (admin: trigger reminder sweep)
 
-## Files added / modified
-- **Added**: `backend/app/services/notification_service.py`, `backend/app/routes/notification.py`, `frontend/src/components/NotificationBell.jsx`, `backend/tests/test_e2e_notifications.py`, `backend/tests/test_notifications_smoke.py`.
-- **Modified**: `backend/server.py` (route mount), `backend/app/routes/admin.py`, `backend/app/routes/ngo.py`, `backend/app/routes/cause.py`, `backend/app/routes/event.py`, `backend/app/routes/enrollment.py`, `backend/app/routes/user.py`, `backend/app/services/ngo_service.py`, `backend/app/services/user_service.py`, `backend/app/utils/firebase_auth.py` (test-auth bypass), `backend/.env` (Resend/Twilio creds), `backend/requirements.txt`, `frontend/src/components/Layout.jsx` (bell wiring).
+## Frontend additions
+- `components/NotificationBell.jsx` — bell + unread badge + slide-out panel +
+  link to preferences. Wired in desktop sidebar + mobile top bar.
+- `pages/NotificationPreferences.jsx` — toggle email / SMS / in-app channels.
+  Reachable at `/v/notifications`, `/ngo/notifications`, `/admin/notifications`.
+- `frontend/.env` — `REACT_APP_FIREBASE_*` keys provided so the SPA boots.
 
 ## What's been implemented (2026-04-25)
-- Live email send verified to Resend account owner inbox.
-- Twilio client connects (rejected fake numbers as expected — credentials valid).
-- Full E2E test (`tests/test_e2e_notifications.py`) green: 10/10 triggers fire and create the right in-app records, with email + SMS dispatched best-effort.
+- 12 notification triggers all green in `tests/test_e2e_notifications.py`.
+- Preferences (default-on, opt-out per channel) green in `tests/test_prefs_and_scheduler.py`.
+- Scheduler reminder sweep green in same file: 24h + 1h windows fire, sentinel
+  prevents duplicates, NGO owner digest delivered.
+- Real Resend email confirmed delivered to `jeevika.kkumar@gmail.com`
+  (id `ecb50847-…`).
+- Twilio client validated (rejected fake numbers as expected).
+- Frontend boots and renders Auth page with Firebase web SDK.
 
 ## Operational notes
 - Resend account is in **TESTING MODE** — emails will only deliver to the
-  Resend account owner's inbox. To send to real organisation/volunteer
-  addresses, verify a domain at https://resend.com/domains and set
-  `SENDER_EMAIL` to an address on that domain.
+  Resend account owner's inbox until a domain is verified at
+  https://resend.com/domains and `SENDER_EMAIL` is updated.
 - Twilio is configured with a US trial number. Trial accounts can only SMS
-  verified numbers — upgrade or verify recipients to send to anyone.
-- `ENABLE_TEST_AUTH=true` in `.env` is a dev/testing convenience that accepts
-  `test::<uid>::<email>::<name>` bearer tokens. **Disable this in production.**
+  numbers verified in the Twilio console.
+- `ENABLE_TEST_AUTH=true` in `/app/backend/.env` accepts
+  `test::<uid>::<email>::<name>` bearer tokens for automated tests. **Disable
+  in production.**
+- Scheduler runs in-process; if you scale to multiple backend replicas, pin
+  it to a single replica or move to an external worker (Celery / Cloud Tasks)
+  to avoid duplicate sends.
 
 ## Backlog / next priorities
-- P1: Daily reminder cron for upcoming events (currently only on RSVP).
-- P1: Frontend `REACT_APP_FIREBASE_*` env vars are not in the upload — once
-  added the full UI loads and the bell will render in-context for real users.
-- P2: Notification preferences page (let users opt out of email or SMS).
-- P2: Webhook from Resend/Twilio to track delivery + bounces.
-- P2: Server-Sent Events / WebSocket push (replace 45s polling).
+- P0: Verify a sender domain in Resend (one-time user action on the Resend
+  dashboard) so production emails reach real addresses.
+- P1: Webhook from Resend / Twilio to track delivery, bounces, opt-outs.
+- P2: Replace 45s polling with Server-Sent Events / WebSocket for instant push.
+- P2: Quiet hours per user (no SMS between 22:00 and 07:00 local).
 
 ## Future enhancement idea
-Add weekly digest emails summarising new causes near the volunteer's city —
-recovers users who unsubscribed from per-event noise but still want highlights.
+Add a **weekly digest email** that bundles "new causes near you" + "your hours
+this week" — recovers users who muted per-event noise but still want highlights.

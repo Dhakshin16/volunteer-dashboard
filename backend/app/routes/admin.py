@@ -114,3 +114,10 @@ def all_reports(_=Depends(require_admin)):
 @router.get("/causes")
 def admin_causes(_=Depends(require_admin)):
     return list_causes(limit=500)
+
+
+@router.post("/scheduler/run-now")
+async def run_scheduler_now(_=Depends(require_admin)):
+    """Manually trigger a reminder sweep — useful for testing."""
+    from app.services import scheduler
+    return await scheduler.run_once_now()

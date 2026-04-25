@@ -52,3 +52,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Background scheduler for reminder notifications
+from app.services import scheduler  # noqa: E402
+
+
+@app.on_event("startup")
+async def _on_startup():
+    scheduler.start()
+
+
+@app.on_event("shutdown")
+async def _on_shutdown():
+    await scheduler.stop()

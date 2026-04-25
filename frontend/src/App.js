@@ -39,6 +39,8 @@ import AdminCrisis from '@/pages/admin/Crisis';
 import AdminCauses from '@/pages/admin/Causes';
 import AdminLeaderboard from '@/pages/admin/Leaderboard';
 
+import NotificationPreferences from '@/pages/NotificationPreferences';
+
 import '@/App.css';
 
 function HomeRedirect() {
@@ -84,6 +86,7 @@ export default function App() {
             <Route path="/v/impact" element={<VolunteerImpact />} />
             <Route path="/v/leaderboard" element={<VolunteerLeaderboard />} />
             <Route path="/v/profile" element={<VolunteerProfile />} />
+            <Route path="/v/notifications" element={<NotificationPreferences />} />
             <Route path="/v/causes/:id" element={<CauseDetail role="volunteer" />} />
           </Route>
 
@@ -98,6 +101,7 @@ export default function App() {
             <Route path="/ngo/volunteers" element={<NgoVolunteers />} />
             <Route path="/ngo/events" element={<NgoEvents />} />
             <Route path="/ngo/profile" element={<NgoProfile />} />
+            <Route path="/ngo/notifications" element={<NotificationPreferences />} />
           </Route>
 
           {/* Admin */}
@@ -107,6 +111,7 @@ export default function App() {
             <Route path="/admin/crisis" element={<AdminCrisis />} />
             <Route path="/admin/causes" element={<AdminCauses />} />
             <Route path="/admin/leaderboard" element={<AdminLeaderboard />} />
+            <Route path="/admin/notifications" element={<NotificationPreferences />} />
             <Route path="/admin/causes/:id" element={<CauseDetail role="admin" />} />
           </Route>
 
