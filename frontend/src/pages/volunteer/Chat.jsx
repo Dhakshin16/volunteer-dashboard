@@ -78,7 +78,7 @@ export default function VolunteerChat() {
         <div>
           <h1 className="font-heading text-2xl text-white">Auri — your AI co-pilot</h1>
           <div className="text-xs text-white/50 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Online — Gemini 2.5 • multimodal
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Online — multimodal AI co-pilot
           </div>
         </div>
       </div>

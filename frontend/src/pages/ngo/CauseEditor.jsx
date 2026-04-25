@@ -37,7 +37,7 @@ export default function NgoCauseEditor() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="font-heading text-4xl text-white">Post a <span className="text-gradient">new cause</span></h1>
-        <p className="text-white/60 mt-2">Be specific — Gemini will craft an AI summary that hooks volunteers.</p>
+        <p className="text-white/60 mt-2">Be specific — a smart AI summary will be added to hook volunteers.</p>
       </div>
       <form onSubmit={submit} className="space-y-5">
         <Card>
@@ -103,7 +103,7 @@ export default function NgoCauseEditor() {
           <Button variant="ghost" type="button" onClick={()=>nav('/ngo/causes')}>Cancel</Button>
           <Button type="submit" disabled={busy} data-testid="cause-submit"><Save size={16} /> {busy ? 'Posting…' : 'Post cause'}</Button>
         </div>
-        <div className="text-xs text-white/40 text-center">After posting, Gemini will auto-generate a 2-line AI summary <Sparkles size={10} className="inline" /></div>
+        <div className="text-xs text-white/40 text-center">After posting, an AI summary is auto-generated to make your cause shine <Sparkles size={10} className="inline" /></div>
       </form>
     </div>
   );

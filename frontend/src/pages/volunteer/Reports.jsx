@@ -100,7 +100,7 @@ export default function VolunteerReports() {
       <div className="flex justify-between items-end flex-wrap gap-3">
         <div>
           <h1 className="font-heading text-4xl text-white">Field <span className="text-gradient">reports</span></h1>
-          <p className="text-white/60 mt-2">Photo + voice + text from the field. Gemini analyzes urgency, needs, and crises.</p>
+          <p className="text-white/60 mt-2">Photo + voice + text from the field. Smart tagging picks up urgency, needs, and crises.</p>
         </div>
         <Button onClick={()=>setOpen(true)}><FileText size={16} /> New report</Button>
       </div>
@@ -165,7 +165,7 @@ export default function VolunteerReports() {
                 ))}
               </div>
             )}
-            <span className="text-xs text-white/60 italic flex-1 line-clamp-1">{speech.transcript || 'Speak — Gemini will polish your transcript.'}</span>
+            <span className="text-xs text-white/60 italic flex-1 line-clamp-1">{speech.transcript || 'Speak — we will polish your transcript.'}</span>
             {speech.transcript && (
               <Button size="sm" variant="ghost" onClick={polishVoice}><Sparkles size={14} /> Polish</Button>
             )}

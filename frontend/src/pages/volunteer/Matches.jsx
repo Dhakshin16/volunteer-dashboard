@@ -21,7 +21,7 @@ export default function VolunteerMatches() {
     <div className="space-y-6">
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
-          <div className="text-xs uppercase tracking-widest text-white/50 flex items-center gap-2"><Sparkles size={12} /> Powered by Gemini 2.5</div>
+          <div className="text-xs uppercase tracking-widest text-white/50 flex items-center gap-2"><Sparkles size={12} /> Smart, personalised matches</div>
           <h1 className="font-heading text-4xl text-white mt-1">Your <span className="text-gradient">AI matches</span></h1>
           <p className="text-white/60 mt-2">Causes ranked by skill overlap, urgency, location, and your interests.</p>
         </div>

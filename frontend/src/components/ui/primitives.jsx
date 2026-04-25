@@ -64,6 +64,16 @@ export function Skeleton({ className }) {
 }
 
 export function Avatar({ src, name, size = 40, className }) {
+  // Support our gradient placeholder format: "gradient::from-x to-y"
+  if (src && typeof src === 'string' && src.startsWith('gradient::')) {
+    const grad = src.replace('gradient::', '');
+    const ini = (name || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+    return (
+      <div style={{ width: size, height: size }} className={cn(`rounded-full bg-gradient-to-br ${grad} text-white grid place-items-center font-semibold text-sm`, className)}>
+        {ini}
+      </div>
+    );
+  }
   if (src) return <img src={src} alt={name || ''} style={{ width: size, height: size }} className={cn('rounded-full object-cover', className)} />;
   const ini = (name || '?').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
   return (

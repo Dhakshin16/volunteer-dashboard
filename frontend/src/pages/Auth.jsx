@@ -78,11 +78,11 @@ export default function Auth() {
           <h2 className="font-heading text-5xl text-white leading-tight">
             Where your <span className="text-gradient">time</span> meets the world's <span className="text-gradient">need</span>.
           </h2>
-          <p className="text-white/65 mt-4 max-w-md">VolunCore uses Google Gemini to match volunteers with the right cause at the right moment, so your effort moves the needle—measurably.</p>
+          <p className="text-white/65 mt-4 max-w-md">VolunCore matches volunteers with the right cause at the right moment, so your effort moves the needle—measurably.</p>
           <div className="mt-8 flex gap-3">
-            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70"><Sparkles size={12} /> Gemini 2.5</div>
-            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70">Firestore</div>
-            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70">Firebase Auth</div>
+            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70"><Sparkles size={12} /> Smart matching</div>
+            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70">Real-time alerts</div>
+            <div className="glass rounded-xl px-3 py-2 text-xs flex items-center gap-2 text-white/70">Impact stories</div>
           </div>
         </div>
         <div className="text-xs text-white/40">By continuing you agree to our Terms and Privacy.</div>

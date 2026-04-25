@@ -30,6 +30,7 @@ class VolunteerProfileIn(BaseModel):
     availability_hours_per_week: Optional[int] = None
     bio: Optional[str] = None
     phone: Optional[str] = None
+    photo_url: Optional[str] = None  # Data URL or hosted URL of avatar
 
 
 class VolunteerProfileOut(VolunteerProfileIn):

@@ -65,13 +65,13 @@ export default function Landing() {
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pt-16 sm:pt-24 pb-16 grid lg:grid-cols-12 gap-10 items-center">
         <div className="lg:col-span-7">
           <Badge variant="violet" className="mb-6">
-            <Sparkles size={12} /> Powered by Google Gemini 2.5 + Firestore
+            <Sparkles size={12} /> Smart, AI-powered volunteering
           </Badge>
           <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight font-light text-white">
             Smart resource allocation for <span className="text-gradient bg-gradient-anim font-semibold">data-driven</span> volunteer coordination.
           </h1>
           <p className="mt-6 text-lg text-white/70 max-w-2xl leading-relaxed">
-            VolunCore matches the right volunteer to the right cause at the right moment—using Google Gemini to analyze skills, urgency, location, and live field reports for measurable social impact.
+            VolunCore matches the right volunteer to the right cause at the right moment — analyzing skills, urgency, location, and live field reports to turn intent into measurable social impact.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/auth?mode=signup&role=volunteer"><Button size="lg" className="glow-violet" data-testid="hero-volunteer-cta">I'm a Volunteer <Heart size={16} /></Button></Link>
@@ -95,7 +95,7 @@ export default function Landing() {
                 <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-xs uppercase tracking-widest text-white/60">Live AI Match</span>
               </div>
-              <Badge variant="cyan"><BrainCircuit size={10} /> Gemini 2.5</Badge>
+              <Badge variant="cyan"><BrainCircuit size={10} /> Smart match</Badge>
             </div>
             <div className="space-y-3">
               {[
@@ -145,11 +145,11 @@ export default function Landing() {
           </h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <Feature icon={BrainCircuit} title="AI Smart Matching" desc="Gemini scores every open cause against your skills, location, and availability." color="bg-violet-500/40" />
+          <Feature icon={BrainCircuit} title="AI Smart Matching" desc="Every open cause is scored against your skills, location and availability — so your time goes where it counts." color="bg-violet-500/40" />
           <Feature icon={Compass} title="Discover Causes" desc="Live feed of open causes across categories with rich filters and live urgency." color="bg-cyan-500/40" />
-          <Feature icon={MapPinned} title="Multimodal Field Reports" desc="Send photo + voice + text from the field. AI tags urgency, needs and crises." color="bg-pink-500/40" />
-          <Feature icon={ShieldCheck} title="Crisis Detection" desc="AI detects emergencies in reports & alerts admins instantly with context." color="bg-rose-500/40" />
-          <Feature icon={BarChart3} title="Weekly Impact Story" desc="Gemini turns your hours, donations, and reports into a shareable impact story." color="bg-emerald-500/40" />
+          <Feature icon={MapPinned} title="Multimodal Field Reports" desc="Send photo + voice + text from the field. Smart tagging surfaces urgency, needs and crises." color="bg-pink-500/40" />
+          <Feature icon={ShieldCheck} title="Crisis Detection" desc="Emergencies in field reports are detected instantly and flagged to admins with rich context." color="bg-rose-500/40" />
+          <Feature icon={BarChart3} title="Weekly Impact Story" desc="Your hours, donations, and reports turn into a beautifully written, shareable impact story." color="bg-emerald-500/40" />
           <Feature icon={Users} title="Coordinator Console" desc="NGOs post causes, manage volunteers, allocate donations & schedule events." color="bg-amber-500/40" />
         </div>
       </section>
@@ -164,7 +164,7 @@ export default function Landing() {
             <Link to="/auth?mode=signup"><Button size="lg" className="glow-violet">Start volunteering <ArrowRight size={16} /></Button></Link>
           </div>
         </div>
-        <div className="text-center text-xs text-white/40 mt-10">© 2025 VolunCore — Built with Google Gemini, Firestore & Firebase Auth.</div>
+        <div className="text-center text-xs text-white/40 mt-10">© 2026 VolunCore — Built by Jeevika and Dhakshin.</div>
       </section>
     </div>
   );

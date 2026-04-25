@@ -21,6 +21,7 @@ import VolunteerReports from '@/pages/volunteer/Reports';
 import VolunteerChat from '@/pages/volunteer/Chat';
 import VolunteerImpact from '@/pages/volunteer/Impact';
 import VolunteerLeaderboard from '@/pages/volunteer/Leaderboard';
+import VolunteerSaved from '@/pages/volunteer/Saved';
 
 // NGO
 import NgoDashboard from '@/pages/ngo/Dashboard';
@@ -85,6 +86,7 @@ export default function App() {
             <Route path="/v/chat" element={<VolunteerChat />} />
             <Route path="/v/impact" element={<VolunteerImpact />} />
             <Route path="/v/leaderboard" element={<VolunteerLeaderboard />} />
+            <Route path="/v/saved" element={<VolunteerSaved />} />
             <Route path="/v/profile" element={<VolunteerProfile />} />
             <Route path="/v/notifications" element={<NotificationPreferences />} />
             <Route path="/v/causes/:id" element={<CauseDetail role="volunteer" />} />

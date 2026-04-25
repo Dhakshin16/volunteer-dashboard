@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Avatar, Button } from '@/components/ui/primitives';
 import AuroraBackground from '@/components/AuroraBackground';
 import NotificationBell from '@/components/NotificationBell';
-import { LayoutDashboard, Compass, Sparkles, MessageCircle, FileText, Heart, BarChart3, Users, ShieldCheck, Building2, LogOut, Trophy, Calendar, User, Menu, X, Award } from 'lucide-react';
+import { LayoutDashboard, Compass, Sparkles, MessageCircle, FileText, Heart, BarChart3, Users, ShieldCheck, Building2, LogOut, Trophy, Calendar, User, Menu, X, Award, Bookmark } from 'lucide-react';
 
 function NavItem({ to, icon: Icon, children, end, testId }) {
   return (
@@ -31,6 +31,23 @@ export default function Layout() {
   const role = profile?.role;
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
+  const [vp, setVp] = useState(null);
+
+  // Pick up volunteer photo for sidebar avatar
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (role !== 'volunteer') return;
+      try {
+        const { api } = await import('@/lib/api');
+        const { data } = await api.get('/volunteer/me');
+        if (!cancelled) setVp(data);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [role]);
+
+  const sidebarAvatarSrc = vp?.photo_url || firebaseUser?.photoURL || null;
 
   const VolunteerNav = (
     <>
@@ -38,6 +55,7 @@ export default function Layout() {
       <NavItem to="/v/discover" icon={Compass} testId="nav-v-discover">Discover</NavItem>
       <NavItem to="/v/matches" icon={Sparkles} testId="nav-v-matches">AI Matches</NavItem>
       <NavItem to="/v/causes" icon={Heart} testId="nav-v-causes">My Causes</NavItem>
+      <NavItem to="/v/saved" icon={Bookmark} testId="nav-v-saved">Saved</NavItem>
       <NavItem to="/v/reports" icon={FileText} testId="nav-v-reports">Field Reports</NavItem>
       <NavItem to="/v/chat" icon={MessageCircle} testId="nav-v-chat">Auri AI</NavItem>
       <NavItem to="/v/impact" icon={BarChart3} testId="nav-v-impact">Impact</NavItem>
@@ -90,7 +108,7 @@ export default function Layout() {
         <nav className="flex flex-col gap-1.5 flex-1">{navItems}</nav>
         <div className="mt-4 pt-4 border-t border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
-            <Avatar src={firebaseUser?.photoURL} name={profile?.name} size={36} />
+            <Avatar src={sidebarAvatarSrc} name={profile?.name} size={36} />
             <div className="min-w-0">
               <div className="text-sm font-medium text-white truncate">{profile?.name}</div>
               <div className="text-xs text-white/40 truncate capitalize">{role}</div>
@@ -132,10 +150,20 @@ export default function Layout() {
 
       {/* Main */}
       <main className="flex-1 min-w-0 lg:ml-0 pt-16 lg:pt-0">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 page-fade-in">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 page-fade-in pb-20">
           <Outlet />
         </div>
       </main>
+
+      {/* Persistent footer credit */}
+      <div
+        data-testid="app-credit"
+        className="fixed bottom-3 right-4 z-30 text-[10px] uppercase tracking-[0.2em] text-white/30 hover:text-white/60 transition pointer-events-none select-none"
+      >
+        <span className="glass rounded-full px-3 py-1.5 backdrop-blur-md">
+          Built by <span className="text-white/70">Jeevika</span> &amp; <span className="text-white/70">Dhakshin</span>
+        </span>
+      </div>
     </div>
   );
 }
