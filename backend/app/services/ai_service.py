@@ -244,12 +244,98 @@ async def generate_impact_report(period: str, stats: dict, volunteer_name: str =
 
 
 # ---------- 6. SKILL EXTRACTION ----------
-SKILL_SYSTEM = """Extract a list of 3-8 concrete volunteer-relevant skills from the user's bio. 
-Return STRICT JSON: {"skills": ["...", "..."]}. Only short lowercase phrases, e.g., 'teaching', 'first aid', 'graphic design'."""
+SKILL_SYSTEM = """You read a volunteer's bio and extract concrete, actionable
+skills they can offer. Be generous: include both hard skills (graphic design,
+data analysis, web development, photography, translation) AND soft skills
+(event organization, project management, teamwork, mentoring, public speaking,
+problem solving, creative thinking, community engagement).
+
+Rules:
+- Output 4-10 skills.
+- Each skill is a short lowercase phrase (1-3 words). NO sentences.
+- No duplicates, no synonyms (pick the clearer one).
+- If the bio mentions interests like "education" or "sustainability",
+  translate them into related skills the person could offer
+  (e.g. "tutoring", "environmental advocacy"), NOT just topic names.
+- Always return AT LEAST 4 skills — infer from context if needed.
+
+Return STRICT JSON only: {"skills": ["...", "..."]}. No prose, no fences.
+"""
+
+
+# Keyword → canonical skill mapping for the rule-based fallback.
+# Order matters slightly: longer phrases first prevent partial matches.
+_SKILL_KEYWORDS = [
+    # hard skills
+    ("graphic design", ["graphic design", "designing", "design "]),
+    ("web development", ["web development", "web dev", "frontend", "backend", "full stack", "coding", "programming", "software"]),
+    ("data analysis", ["data analysis", "data analytics", "analytics", "data science"]),
+    ("photography", ["photography", "photo", "videography"]),
+    ("translation", ["translation", "translating", "translate", "interpreter"]),
+    ("teaching", ["teaching", "teach", "tutoring", "tutor", "instruct"]),
+    ("first aid", ["first aid", "cpr", "medical aid"]),
+    ("fundraising", ["fundraising", "fundraiser", "donor"]),
+    ("public speaking", ["public speaking", "presenting", "speech", "speaker"]),
+    ("writing", ["writing", "writer", "copywriting", "content writing", "blogging", "journalism"]),
+    ("social media", ["social media", "instagram", "twitter", "linkedin marketing"]),
+    ("driving", ["driving", "driver"]),
+    ("cooking", ["cooking", "cook ", "chef", "kitchen"]),
+    ("logistics", ["logistics", "supply chain", "inventory"]),
+    ("research", ["research", "researching"]),
+    # soft / general
+    ("event organization", ["organizing events", "organising events", "organize events", "event organi", "event management", "event planning", "events"]),
+    ("project management", ["project management", "managing projects", "project lead", "coordinating"]),
+    ("teamwork", ["teamwork", "team work", "collaborat", "team player"]),
+    ("mentoring", ["mentoring", "mentor", "coaching", "guiding"]),
+    ("problem solving", ["problem solving", "solve problems", "solving everyday", "troubleshoot"]),
+    ("creative thinking", ["creativity", "creative", "creative thinking", "think differently", "innovation"]),
+    ("community engagement", ["community service", "community engagement", "community outreach", "outreach"]),
+    ("environmental advocacy", ["sustainability", "environment", "climate", "eco "]),
+    ("education advocacy", ["education ", "literacy"]),
+    ("social welfare", ["social welfare", "social impact", "social work"]),
+    ("technology", ["technology", "tech ", "new tools", "new tech"]),
+    ("continuous learning", ["learning new things", "continuous learning", "self-learning", "self learning", "upskilling", "love to learn"]),
+    ("leadership", ["leadership", "leading", "led a team"]),
+    ("communication", ["communication", "communicat"]),
+    ("empathy", ["empathy", "empathetic", "listening", "active listener"]),
+]
+
+
+def _rule_based_skills(bio: str, max_n: int = 8) -> List[str]:
+    """Lightweight keyword scanner that ALWAYS returns something useful."""
+    if not bio:
+        return []
+    lo = " " + bio.lower() + " "
+    found: List[str] = []
+    for skill, keywords in _SKILL_KEYWORDS:
+        if skill in found:
+            continue
+        for kw in keywords:
+            if kw in lo:
+                found.append(skill)
+                break
+        if len(found) >= max_n:
+            break
+
+    # Sensible defaults if the bio is generic but volunteer-flavoured
+    if len(found) < 4:
+        defaults = ["teamwork", "community engagement", "communication", "continuous learning"]
+        for d in defaults:
+            if d not in found:
+                found.append(d)
+                if len(found) >= 4:
+                    break
+    return found[:max_n]
 
 
 async def extract_skills(bio: str) -> List[str]:
+    bio = (bio or "").strip()
+    if not bio:
+        return []
+
+    # Try the LLM first
     chat = _make_chat(f"skills-{uuid.uuid4()}", SKILL_SYSTEM, LLM_MODEL_FAST)
+    llm_skills: List[str] = []
     try:
         resp = await chat.send_message(UserMessage(text=bio))
         cleaned = _strip_fences(resp)
@@ -257,9 +343,35 @@ async def extract_skills(bio: str) -> List[str]:
         if m:
             cleaned = m.group(0)
         data = json.loads(cleaned)
-        return [s.lower() for s in data.get("skills", []) if isinstance(s, str)][:8]
+        raw = data.get("skills") if isinstance(data, dict) else []
+        if isinstance(raw, list):
+            for s in raw:
+                if not isinstance(s, str):
+                    continue
+                s = re.sub(r"[\.\!\?\,]", "", s).strip().lower()
+                # Trim to 3 words max
+                words = s.split()
+                if 0 < len(words) <= 4 and s not in llm_skills:
+                    llm_skills.append(s)
     except Exception:
-        return []
+        llm_skills = []
+
+    # Rule-based pass — surfaces skills the LLM may have missed
+    rule_skills = _rule_based_skills(bio, max_n=8)
+
+    # Merge: LLM first (higher quality), then rules to fill gaps
+    merged: List[str] = []
+    for s in llm_skills + rule_skills:
+        if s and s not in merged:
+            merged.append(s)
+        if len(merged) >= 8:
+            break
+
+    # Floor: never return empty if the bio had real content
+    if not merged and len(bio) >= 20:
+        merged = ["teamwork", "community engagement", "communication", "continuous learning"]
+
+    return merged[:8]
 
 
 # ---------- 7. VOICE TRANSCRIPT POLISH ----------

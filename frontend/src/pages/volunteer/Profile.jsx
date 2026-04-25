@@ -69,9 +69,14 @@ export default function VolunteerProfile() {
     setExtracting(true);
     try {
       const { data } = await api.post('/volunteer/extract-skills', { bio: form.bio });
+      const newOnes = (data.skills || []).filter(s => !form.skills.includes(s));
       const merged = Array.from(new Set([...form.skills, ...(data.skills || [])]));
       update('skills', merged);
-      toast.success(`Added ${data.skills?.length || 0} smart-extracted skills`);
+      if (newOnes.length === 0) {
+        toast.info('No new skills found beyond what you already have');
+      } else {
+        toast.success(`Added ${newOnes.length} smart-extracted skill${newOnes.length === 1 ? '' : 's'}`);
+      }
     } catch (e) { toast.error(e.friendly); } finally { setExtracting(false); }
   };
 
