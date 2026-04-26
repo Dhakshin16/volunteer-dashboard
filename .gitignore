@@ -100,3 +100,4 @@ credentials.json
 *.key
 .credentials
 
+**/firebase-admin.json

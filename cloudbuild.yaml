@@ -1,0 +1,96 @@
+################################################################################
+# cloudbuild.yaml — VolunCore GCP deployment pipeline
+#
+# Builds and deploys both backend (FastAPI) and frontend (React) to Cloud Run.
+#
+# Required substitution variables (set in Cloud Build trigger or --substitutions):
+#   _REGION            : e.g. us-central1
+#   _PROJECT_ID        : your GCP project ID
+#   _BACKEND_SERVICE   : Cloud Run service name for backend  (e.g. voluncore-backend)
+#   _FRONTEND_SERVICE  : Cloud Run service name for frontend (e.g. voluncore-frontend)
+#   _BACKEND_URL       : public HTTPS URL of the backend Cloud Run service
+################################################################################
+
+substitutions:
+  _REGION: us-central1
+  _PROJECT_ID: ${PROJECT_ID}
+  _BACKEND_SERVICE: voluncore-backend
+  _FRONTEND_SERVICE: voluncore-frontend
+  _BACKEND_URL: https://voluncore-backend-xxxx-uc.a.run.app  # update after first deploy
+
+steps:
+  # ── 1. Build backend image ──────────────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: build-backend
+    args:
+      - build
+      - -t
+      - gcr.io/${_PROJECT_ID}/${_BACKEND_SERVICE}:$SHORT_SHA
+      - -t
+      - gcr.io/${_PROJECT_ID}/${_BACKEND_SERVICE}:latest
+      - ./backend
+
+  # ── 2. Build frontend image ─────────────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: build-frontend
+    args:
+      - build
+      - -t
+      - gcr.io/${_PROJECT_ID}/${_FRONTEND_SERVICE}:$SHORT_SHA
+      - -t
+      - gcr.io/${_PROJECT_ID}/${_FRONTEND_SERVICE}:latest
+      - --build-arg
+      - REACT_APP_BACKEND_URL=${_BACKEND_URL}
+      - ./frontend
+
+  # ── 3. Push backend ─────────────────────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-backend
+    args: [push, gcr.io/${_PROJECT_ID}/${_BACKEND_SERVICE}:$SHORT_SHA]
+    waitFor: [build-backend]
+
+  # ── 4. Push frontend ────────────────────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-frontend
+    args: [push, gcr.io/${_PROJECT_ID}/${_FRONTEND_SERVICE}:$SHORT_SHA]
+    waitFor: [build-frontend]
+
+  # ── 5. Deploy backend to Cloud Run ──────────────────────────────────────────
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-backend
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_BACKEND_SERVICE}
+      - --image=gcr.io/${_PROJECT_ID}/${_BACKEND_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8000
+      - --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,FIREBASE_WEB_API_KEY=firebase-web-api-key:latest,RESEND_API_KEY=resend-api-key:latest,TWILIO_ACCOUNT_SID=twilio-account-sid:latest,TWILIO_AUTH_TOKEN=twilio-auth-token:latest,TWILIO_PHONE_NUMBER=twilio-phone-number:latest,ADMIN_EMAILS=admin-emails:latest
+      - --set-volumes=firebase-secret:/secrets
+      - --update-env-vars=FIREBASE_CREDENTIALS_PATH=/secrets/firebase-admin.json
+    waitFor: [push-backend]
+
+  # ── 6. Deploy frontend to Cloud Run ─────────────────────────────────────────
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-frontend
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_FRONTEND_SERVICE}
+      - --image=gcr.io/${_PROJECT_ID}/${_FRONTEND_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+    waitFor: [push-frontend]
+
+images:
+  - gcr.io/${_PROJECT_ID}/${_BACKEND_SERVICE}:$SHORT_SHA
+  - gcr.io/${_PROJECT_ID}/${_FRONTEND_SERVICE}:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
