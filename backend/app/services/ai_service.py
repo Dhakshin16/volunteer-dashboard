@@ -17,7 +17,7 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 from app.core.config import LLM_KEY, LLM_PROVIDER, LLM_MODEL_FAST, LLM_MODEL_PRO
 
 
-# ---------- helpers ----------
+#  helpers 
 def _strip_fences(s: str) -> str:
     return re.sub(r"```(?:json)?|```", "", s).strip()
 
@@ -42,7 +42,7 @@ def _decode_image(data: str) -> Optional[ImageContent]:
         return None
 
 
-# ---------- 1. CHATBOT (Auri) ----------
+#  1. CHATBOT (Auri) 
 AURI_SYSTEM = """You are Auri — an AI guide for VolunCore, a smart volunteer coordination platform for social impact.
 You help volunteers find meaningful causes, give NGOs strategic advice, summarize field activity, and motivate users with empathy.
 Keep replies concise (under 150 words by default), warm, and action-oriented. Always end with a small next step.
@@ -65,7 +65,7 @@ async def chat_with_auri(session_id: str, message: str, image_b64: Optional[str]
         return f"I'm having a hiccup connecting to Auri right now. Please try again. ({e})"
 
 
-# ---------- 2. VOLUNTEER ↔ CAUSE MATCHING ----------
+#  2. VOLUNTEER ↔ CAUSE MATCHING 
 MATCH_SYSTEM = """You are an expert volunteer-matching engine.
 Given a volunteer profile and a list of open causes, score each cause 0–1 for how well it fits the volunteer.
 Consider: skill overlap, location proximity, urgency, interest alignment, availability.
@@ -141,7 +141,7 @@ async def match_volunteer_to_causes(volunteer: dict, causes: List[dict]) -> List
         return out
 
 
-# ---------- 3. FIELD REPORT ANALYSIS ----------
+#  3. FIELD REPORT ANALYSIS 
 REPORT_SYSTEM = """You analyze field reports from volunteers/NGOs.
 Return STRICT JSON only with keys:
   "urgency": one of low|medium|high|critical,
@@ -186,7 +186,7 @@ async def analyze_field_report(text: str, image_b64: Optional[str] = None) -> Di
         }
 
 
-# ---------- 4. CAUSE AI-SUMMARY ----------
+#  4. CAUSE AI-SUMMARY 
 CAUSE_SUM_SYSTEM = """Write a punchy 2-sentence pitch for a volunteer cause. Tone: warm, urgent, action-driven.
 Return ONLY the pitch text, no markdown."""
 
@@ -207,7 +207,7 @@ async def summarize_cause(cause: dict) -> str:
         return cause.get("title", "")
 
 
-# ---------- 5. WEEKLY IMPACT REPORT ----------
+#  5. WEEKLY IMPACT REPORT 
 REPORT_GEN_SYSTEM = """You are a social-impact storyteller. Given raw activity data, write a beautiful weekly report.
 Return STRICT JSON with keys:
   "headline": 8-word inspiring headline,
@@ -243,7 +243,7 @@ async def generate_impact_report(period: str, stats: dict, volunteer_name: str =
         }
 
 
-# ---------- 6. SKILL EXTRACTION ----------
+#  6. SKILL EXTRACTION 
 SKILL_SYSTEM = """You read a volunteer's bio and extract concrete, actionable
 skills they can offer. Be generous: include both hard skills (graphic design,
 data analysis, web development, photography, translation) AND soft skills
@@ -374,7 +374,7 @@ async def extract_skills(bio: str) -> List[str]:
     return merged[:8]
 
 
-# ---------- 7. VOICE TRANSCRIPT POLISH ----------
+#  7. VOICE TRANSCRIPT POLISH 
 VOICE_SYSTEM = """You polish raw voice-to-text transcripts into clean field reports.
 Fix grammar, remove filler, keep the user's voice. Return ONLY the cleaned text, max 200 words."""
 

@@ -27,7 +27,7 @@ class DevLoginIn(BaseModel):
     email: EmailStr
     password: str
     name: Optional[str] = None
-    role: Optional[str] = None  # volunteer | ngo | admin (forced for tests)
+    role: Optional[str] = None  # volunteer | ngo | admin 
 
 
 class DevLoginOut(BaseModel):
@@ -95,8 +95,6 @@ async def dev_login(payload: DevLoginIn):
     if not uid or not id_token:
         raise HTTPException(500, "Identity Toolkit response missing token/uid")
 
-    # Ensure a Firestore user doc exists (mirror what get_or_create_user would do
-    # on first authenticated request, so the role can be set immediately).
     ref = db.collection("users").document(uid)
     snap = ref.get()
     email_lower = payload.email.lower()
@@ -115,7 +113,7 @@ async def dev_login(payload: DevLoginIn):
         if existing.get("role") != "admin":
             ref.update({"role": "admin"})
 
-    # Optionally force a role (skipped for admin email — that's auto)
+
     role = None
     if payload.role and email_lower not in ADMIN_EMAILS:
         if payload.role not in ("volunteer", "ngo", "admin"):

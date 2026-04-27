@@ -19,7 +19,7 @@ from app.utils.firestore_utils import now_iso, serialize_doc, new_id
 
 logger = logging.getLogger("notifications")
 
-# ---------- Configuration ----------
+#  Configuration 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "onboarding@resend.dev").strip()
 SENDER_NAME = os.getenv("SENDER_NAME", "VolunCore").strip()
@@ -39,7 +39,7 @@ if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
         logger.warning("Twilio init failed: %s", exc)
 
 
-# ---------- Email ----------
+#  Email 
 def _wrap_html(title: str, body_html: str, cta_label: Optional[str] = None, cta_url: Optional[str] = None) -> str:
     cta_block = ""
     if cta_label and cta_url:
@@ -88,7 +88,7 @@ async def send_email(to: str, subject: str, html: str) -> dict:
         return {"sent": False, "error": str(exc)}
 
 
-# ---------- SMS ----------
+#  SMS 
 async def send_sms(to: str, body: str) -> dict:
     """Send SMS via Twilio. No-op when not configured."""
     if not to:
@@ -106,7 +106,7 @@ async def send_sms(to: str, body: str) -> dict:
         return {"sent": False, "error": str(exc)}
 
 
-# ---------- In-app notifications ----------
+#  In-app notifications 
 def create_in_app(user_id: str, title: str, message: str, kind: str = "info", link: Optional[str] = None) -> dict:
     if not user_id:
         return {}
@@ -151,7 +151,7 @@ def mark_all_read(user_id: str) -> dict:
     return {"ok": True, "updated": count}
 
 
-# ---------- High-level dispatch ----------
+#  High-level dispatch 
 async def notify(
     *,
     user_id: Optional[str],
@@ -220,7 +220,7 @@ def notify_sync(**kwargs) -> dict:
     return asyncio.run(notify(**kwargs))
 
 
-# ---------- Email/SMS templates ----------
+#  Email/SMS templates 
 def org_approval_email_html(org_name: str, dashboard_url: str) -> str:
     body = (
         f"<p>Great news — <strong>{org_name}</strong> has been approved on VolunCore.</p>"
